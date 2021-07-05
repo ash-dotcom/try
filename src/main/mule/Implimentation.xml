@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="f5bc6340-8b46-4fb6-900f-ecb39f8fcf3c" basePath="/united/flights" >
+		<http:request-connection host="mu.learn.mulesoft.com" port="80" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="099e2e74-3f44-41f8-a596-f8a28b14399d" basePath="/untited" >
+		<http:request-connection host="localhost" port="80" />
+	</http:request-config>
+	<flow name="Get" doc:id="11a6fa27-3ef1-47c9-aeb8-6da5b605c8a5" >
+		<set-variable value="#[attributes.queryParams.destination]" doc:name="Set Variable" doc:id="ae9616df-fca0-42a7-acf6-cabac87a8ec1" variableName="destination"/>
+		<choice doc:name="Choice" doc:id="764dea67-c4f0-4a9a-8d6b-2853b050eef4" >
+			<when expression="#[vars.destination == null]">
+				<http:request method="GET" doc:name="Request" doc:id="d3095862-300a-4f50-a48c-af70854133ac" config-ref="HTTP_Request_configuration" path="/"/>
+				<ee:transform doc:name="Transform Message" doc:id="39ee5560-a8c1-4f25-9565-22be65cb6ebf" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+	payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<http:request method="GET" doc:name="Request" doc:id="bcb61e05-9183-4372-9b96-bb114acbba1d" config-ref="HTTP_Request_configuration" path="/{destination}">
+					<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"destination" : vars.destination
+}]]]></http:uri-params>
+				</http:request>
+				<ee:transform doc:name="Transform Message" doc:id="50bfdbb6-f35a-4fb0-98ab-af0e3626748a">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="POST" doc:id="200c4a23-c8b8-4f4b-95a9-25db72eb9137" >
+		<ee:transform doc:name="Transform Message" doc:id="d9cf2e11-b7b0-4f45-8671-f123e8c9eb5a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Flight created (but not really)"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="PATCH" doc:id="e6a9cee8-76e7-4597-a3e3-7598fa1b206b" >
+		<ee:transform doc:name="Transform Message" doc:id="783f6719-321d-4676-95b7-9a32b74525c2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Flight Updated (but not really)"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="DELETE" doc:id="5487b356-d49b-4241-a272-8bba549697c2" >
+		<ee:transform doc:name="Transform Message" doc:id="fbc49c15-fcc3-4070-9045-d710434d76b5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Flight Deleted (but not really)"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
